@@ -18,6 +18,8 @@
 
 const { execFile } = require('child_process');
 const https = require('https');
+const fsp = require('fs/promises');
+const path = require('path');
 const gitTokens = require('./git-tokens');
 
 const KNOWN_PROVIDERS = gitTokens.KNOWN_PROVIDERS;
@@ -33,7 +35,7 @@ const KNOWN_PROVIDERS = gitTokens.KNOWN_PROVIDERS;
 // User-embedded HTTPS (PAT-in-URL): https://x:y@github.com/OWNER/REPO — still matches.
 const HOST_REGEX = /(github\.com|gitee\.com)[:/]([^/]+)\/([^/]+?)(?:\.git)?\s*$/i;
 
-function detectHost(absCwd) {
+function _detectHostAt(absCwd) {
   return new Promise((resolve) => {
     if (!absCwd) return resolve(null);
     execFile('git', ['-C', absCwd, 'remote', 'get-url', 'origin'], { timeout: 4000 }, (err, stdout) => {
@@ -45,6 +47,33 @@ function detectHost(absCwd) {
       resolve({ provider, owner: m[2], repo: m[3] });
     });
   });
+}
+
+// bug-89: when the session's cwd is a wrapper folder that is NOT itself
+// a git repo but contains a git repo at an immediate subdirectory (e.g.
+// `cwd/myco`), walk one level deep and return the first child whose
+// origin matches a known host. Deeper walks are intentionally avoided
+// to stay fast and to avoid picking up vendored third-party repos. Dot-
+// directories (.cache, .vscode, .git, …) are skipped. Cap at 50 children
+// so a wrapper with thousands of entries doesn't stall /feature.
+const NESTED_REPO_MAX_CHILDREN = 50;
+
+async function detectHost(absCwd) {
+  const direct = await _detectHostAt(absCwd);
+  if (direct) return direct;
+  if (!absCwd) return null;
+  let entries;
+  try { entries = await fsp.readdir(absCwd, { withFileTypes: true }); }
+  catch { return null; }
+  for (let i = 0; i < entries.length && i < NESTED_REPO_MAX_CHILDREN; i++) {
+    const e = entries[i];
+    if (!e.isDirectory()) continue;
+    if (e.name.startsWith('.')) continue;
+    const child = path.join(absCwd, e.name);
+    const host = await _detectHostAt(child); // eslint-disable-line no-await-in-loop
+    if (host) return host;
+  }
+  return null;
 }
 
 // ── tiny HTTPS helper ───────────────────────────────────────────────────────

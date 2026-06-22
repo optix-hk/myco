@@ -4814,6 +4814,17 @@ test_chat_window() {
   # github.js back-compat shim's user-level setToken path so the OAuth
   # callback keeps working.
   node_test_result test/gitee-host-dispatch.test.js "test/gitee-host-dispatch.test.js (31 cases)"
+  # bug-89: detectHost falls back to immediate non-dot children when the
+  # session's cwd is a wrapper folder (not itself a git repo) containing
+  # a git repo at a subdirectory like `cwd/myco`. Locks the four shapes:
+  # wrapper+github-child resolves, wrapper+gitee-child resolves
+  # (provider-agnostic), wrapper with no git-child returns null (dot-dirs
+  # skipped, no false positives), and a wrapper that IS itself a git repo
+  # with a recognized remote prefers the direct cwd over a nested child
+  # (no surprise fallback). Would have caught the original regression
+  # where /feature rejected sessions instantiated with a folder-name main
+  # project wrapping a git repo.
+  node_test_result test/bug-89-nested-repo-detect.test.js "test/bug-89-nested-repo-detect.test.js (4 cases)"
   # 2026-05-17 chat persistence + cross-device + ordering contract.
   # Locks the four pillars documented in CLAUDE.md → "Chat persistence
   # & cross-device consistency": (1) every device sees identical

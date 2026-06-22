@@ -6250,7 +6250,61 @@
         "rewritten": true
       },
       "description": "**Problem:** Users can't categorize or filter plan items because the plan item view has no tag support.\n**Expected:** Plan item view displays tags and offers an inline control to quickly add or delete tags without leaving the view.\n**Actual:** No tag UI exists on the plan item view; tags can't be attached, shown, or removed."
+    },
+    {
+      "id": "bug-87",
+      "text": "Tapping chat bubble expecting answer shows no answer input popup",
+      "layer": "Bug",
+      "done": false,
+      "addedAt": "2026-06-22T05:58:34.374Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [],
+      "comments": [],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "tap to answer in chat bubble that expects an answer not showing any popup to answer. Expected: a popup/chat entering area to input answers",
+        "rewritten": true
+      },
+      "description": "**Problem:** Tapping a chat bubble that expects an answer does not surface any input UI to provide the answer.\n**Expected:** A popup or chat entry area appears to input answers.\n**Actual:** No popup or answer area is shown on tap."
+    },
+    {
+      "id": "bug-88",
+      "text": "Context usage percentile hard-codes 200k window instead of using model's actual limit",
+      "layer": "Bug",
+      "done": false,
+      "addedAt": "2026-06-22T06:13:54.789Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [],
+      "comments": [],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "when interacting with agents, chat bubble pane bottom-right context usage percentile display seems to hard-code 200k context window, even when GLM-5.2 is used which is a 1M context window model. Expected: configurable or auto-detected",
+        "rewritten": true
+      },
+      "description": "**Problem:** Chat bubble pane bottom-right context usage percentile display hard-codes a 200k context window, misreporting usage for larger-window models.\n**Expected:** Context window is configurable or auto-detected from the active model (e.g. GLM-5.2's 1M window).\n**Actual:** Always assumes 200k, so percentile is wrong for models like GLM-5.2.\n**Context:** Repro: interact with agents using GLM-5.2 and observe the bottom-right context usage display in the chat bubble pane."
+    },
+    {
+      "id": "bug-89",
+      "text": "/feature fails when folder contains nested git repo instead of being one",
+      "layer": "Bug",
+      "done": false,
+      "addedAt": "2026-06-22T08:07:39.487Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [
+        "foster-chen"
+      ],
+      "comments": [],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "observed: used \"/feature\" on sessions (instantiated with a git repo as main project AND folder name as main project) and received \"coud not detect a github.com or gitee.com remote for this session's cwd: xxxxxx/myco-foster-chen-8e22248d. /feature requires `git remote get-url origin` to point at one of those hosts.\". The cwd in this message is not a git repository, but the cwd/myco is in this specific case. Expected: Should be able to create feature requests",
+        "rewritten": true
+      },
+      "description": "**Problem:** `/feature` rejects sessions whose cwd is a plain folder wrapping a git repo, blocking feature request creation.\n**Expected:** `/feature` should resolve the underlying git repo (e.g. `cwd/myco`) and create the feature request.\n**Actual:** Errors with \"coud not detect a github.com or gitee.com remote for this session's cwd: xxxxxx/myco-foster-chen-8e22248d\" because it runs `git remote get-url origin` against the non-repo cwd.\n**Context:** Observed on sessions instantiated with a git repo as main project AND folder name as main project; the cwd itself is not a git repository, but `cwd/myco` is.",
+      "tags": []
     }
   ],
-  "updatedAt": "2026-06-12T04:19:53.465Z"
+  "updatedAt": "2026-06-22T08:07:45.701Z"
 }
