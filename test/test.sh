@@ -2865,7 +2865,17 @@ test_chat_window() {
   # bindings, plus inline behavior simulation of _filterPlanItems so
   # the substring/type/done/intersect semantics are pinned without a
   # browser.
-  node_test_result test/fr-56-plan-filter-search.test.js "test/fr-56-plan-filter-search.test.js (20 cases)"
+  node_test_result test/fr-56-plan-filter-search.test.js "test/fr-56-plan-filter-search.test.js (26 cases — incl. 6 fr-102 @user filter cases)"
+  # fr-102: @<username> structured user-filter token in the plan-search
+  # query. Typing `@<login>` narrows to items filed by that user
+  # (it.addedBy, case-insensitive); any text after the @user token
+  # continues as a normal keyword substring. The @username renders blue
+  # in the "no items match" summary line (per @foster-chen's "render
+  # ampersand and username blue" comment). Pins _parsePlanSearchQuery,
+  # _filterPlanItems' @user handling, the summary-line span emission,
+  # and the .plan-search-user-token CSS rule. The fr-56 test was also
+  # extended with 6 twinned-ref @user behavior cases.
+  node_test_result test/fr-102-plan-search-user-filter.test.js "test/fr-102-plan-search-user-filter.test.js (19 cases)"
   # fr-65: per-layer "▶ N closed (tap to expand)" accordion that rolls
   # done plan items into a collapsible footer beneath each layer's open
   # items. Replaces the all-or-nothing bug-15 "Open only" toggle with

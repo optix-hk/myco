@@ -154,11 +154,23 @@ t('app.js: bindPlanSearch debounces and stores query in state (not localStorage)
 function filterPlanItemsRef(items, opts) {
   const { openOnly, types, search } = (opts || {});
   const typeSet = Array.isArray(types) ? new Set(types) : null;
-  const q = String(search || '').trim().toLowerCase();
+  // fr-102: mirror _parsePlanSearchQuery — extract the first @<username>
+  // token as a user filter (matched case-insensitively against
+  // it.addedBy); remainder becomes the keyword substring.
+  const raw = String(search || '').trim();
+  const userMatch = raw.match(/@([a-z0-9_-]+)/i);
+  const user = userMatch ? userMatch[1].toLowerCase() : null;
+  const q = userMatch
+    ? raw.replace(/@([a-z0-9_-]+)/i, ' ').replace(/\s+/g, ' ').trim().toLowerCase()
+    : raw.toLowerCase();
   return (items || []).filter((it) => {
     if (!it) return false;
     if (openOnly && it.done) return false;
     if (typeSet && it.layer && !typeSet.has(it.layer)) return false;
+    if (user) {
+      const by = String(it.addedBy || '').toLowerCase();
+      if (by !== user) return false;
+    }
     if (q) {
       const hay = ((it.id || '') + ' ' + (it.text || '') + ' ' + (it.body || '')).toLowerCase();
       if (!hay.includes(q)) return false;
@@ -168,12 +180,12 @@ function filterPlanItemsRef(items, opts) {
 }
 
 const SAMPLE = [
-  { id: 'bug-1',  layer: 'Bug',     text: 'WS reconnect storm on slow networks', done: false },
-  { id: 'bug-2',  layer: 'Bug',     text: 'Spinner stuck after deploy',         done: true  },
-  { id: 'fr-1',   layer: 'Feature', text: 'Add fuzz search to the plan view',   done: false },
-  { id: 'fr-2',   layer: 'Feature', text: 'Run-queue auto-advance on cancel',   done: true  },
-  { id: 'td-1',   layer: 'Todo',    text: 'Refresh architecture.md',            done: false },
-  { id: 'td-2',   layer: 'Todo',    text: 'Move docker files to docker/',       done: true  },
+  { id: 'bug-1',  layer: 'Bug',     text: 'WS reconnect storm on slow networks', done: false, addedBy: 'alice' },
+  { id: 'bug-2',  layer: 'Bug',     text: 'Spinner stuck after deploy',         done: true,  addedBy: 'bob'   },
+  { id: 'fr-1',   layer: 'Feature', text: 'Add fuzz search to the plan view',   done: false, addedBy: 'alice' },
+  { id: 'fr-2',   layer: 'Feature', text: 'Run-queue auto-advance on cancel',   done: true,  addedBy: 'carol' },
+  { id: 'td-1',   layer: 'Todo',    text: 'Refresh architecture.md',            done: false, addedBy: 'bob'   },
+  { id: 'td-2',   layer: 'Todo',    text: 'Move docker files to docker/',       done: true,  addedBy: 'alice' },
 ];
 
 t('behavior: no filter returns everything', () => {
@@ -254,6 +266,58 @@ t('behavior: _filterPlanItems exists in app.js with the same key options', () =>
   const body = end === -1 ? rest : rest.slice(0, end + 1);
   assert.ok(/\bopenOnly\b/.test(body) && /\btypes\b/.test(body) && /\bsearch\b/.test(body),
     '_filterPlanItems must destructure { openOnly, types, search } from its opts arg');
+});
+
+// ──────────────────────────────────────────────────────────────────────
+// fr-102: @<username> structured user-filter token in the search query.
+// The first @<login> match narrows to items filed by that user
+// (it.addedBy, case-insensitive); the rest of the query stays a
+// keyword substring. Mirrors _parsePlanSearchQuery + the updated
+// _filterPlanItems in app.js.
+// ──────────────────────────────────────────────────────────────────────
+
+t('behavior (fr-102): @user alone filters to items filed by that user', () => {
+  const got = filterPlanItemsRef(SAMPLE, { search: '@alice' });
+  assert.strictEqual(got.length, 3, 'alice filed 3 of the 6 sample items');
+  assert.ok(got.every((it) => it.addedBy === 'alice'),
+    'every surviving item must be filed by alice');
+});
+
+t('behavior (fr-102): @user is case-insensitive on the username', () => {
+  const got = filterPlanItemsRef(SAMPLE, { search: '@ALICE' });
+  assert.strictEqual(got.length, 3, '@ALICE matches alice case-insensitively');
+  assert.ok(got.every((it) => it.addedBy === 'alice'));
+});
+
+t('behavior (fr-102): @user + keyword combines user filter AND keyword substring', () => {
+  // alice filed bug-1 ("WS reconnect storm…") + fr-1 ("fuzz search") + td-2 ("docker").
+  // Keyword "search" narrows to fr-1 only.
+  const got = filterPlanItemsRef(SAMPLE, { search: '@alice search' });
+  assert.strictEqual(got.length, 1);
+  assert.strictEqual(got[0].id, 'fr-1');
+});
+
+t('behavior (fr-102): @user with no matching filings returns empty', () => {
+  const got = filterPlanItemsRef(SAMPLE, { search: '@nobody' });
+  assert.strictEqual(got.length, 0, 'no item was filed by @nobody');
+});
+
+t('behavior (fr-102): @user token can appear mid-query, not just at the start', () => {
+  const got = filterPlanItemsRef(SAMPLE, { search: 'docker @alice' });
+  assert.strictEqual(got.length, 1);
+  assert.strictEqual(got[0].id, 'td-2');
+});
+
+t('behavior (fr-102): items without addedBy do not match any @user filter', () => {
+  const items = [
+    { id: 'orphan-1', text: 'no addedBy field', done: false, layer: 'Bug' },
+    { id: 'bug-1',    text: 'normal bug',       done: false, layer: 'Bug', addedBy: 'alice' },
+  ];
+  assert.strictEqual(filterPlanItemsRef(items, { search: '@alice' }).length, 1,
+    'only the item with addedBy=alice survives @alice');
+  // No user filter → both survive (forward-compat).
+  assert.strictEqual(filterPlanItemsRef(items, { search: 'normal' }).length, 1,
+    'orphan still matches a plain keyword search');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
