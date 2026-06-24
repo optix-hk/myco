@@ -6443,7 +6443,182 @@
       },
       "description": "**Problem:** Refreshing the browser causes plan items with successful runs (marked \"done\" next to the vote icon) to revert to their initial state.\n**Expected:** Plan item state should be independent of browser refresh; the server's myco-state should be the sole source of truth, unaffected by browser activity/cache.\n**Actual:** Successful run state is lost on refresh, reverting to the initial state.",
       "tags": []
+    },
+    {
+      "id": "fr-107",
+      "text": "Show per-item token usage and cost at bottom-right of plan item",
+      "layer": "Feature",
+      "done": false,
+      "addedAt": "2026-06-24T08:28:01.044Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [
+        "foster-chen"
+      ],
+      "comments": [
+        {
+          "id": "0540732b7c8b",
+          "user": "claude",
+          "text": "✓ fr-107 — analyze · 23.8s · $2.4495 · 236↓/1290↑",
+          "ts": "2026-06-24T08:29:02.473Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-24T08:28:38.637Z"
+          }
+        },
+        {
+          "id": "35d846a97a64",
+          "user": "claude",
+          "text": "✓ GREEN — 17/17, and all 6 adjacent suites green. · 172.8s · $3.8797 · 10655↓/7244↑",
+          "ts": "2026-06-24T08:32:18.009Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-24T08:28:38.637Z"
+          }
+        },
+        {
+          "id": "ace08fdecace",
+          "user": "claude",
+          "text": "✓ fr-107 — code (redo, addressing critic) · 143.0s · $4.5660 · 8244↓/6085↑",
+          "ts": "2026-06-24T08:38:19.572Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-24T08:28:38.637Z"
+          }
+        },
+        {
+          "id": "ba7df32be3bf",
+          "user": "claude",
+          "text": "✓ Verify complete. · 44.2s · $4.8162 · 1567↓/1000↑",
+          "ts": "2026-06-24T08:39:37.796Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-24T08:28:38.637Z"
+          }
+        },
+        {
+          "id": "c0a7cc73c876",
+          "user": "claude",
+          "text": "✓ fr-107 run complete. Summary of what landed (re-implementation via brainstorming → myco stage flow): · 17.3s · $4.8983 · 557↓/259↑",
+          "ts": "2026-06-24T08:40:42.497Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-24T08:28:38.637Z"
+          }
+        }
+      ],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "show per-item token usage and cost in bottom-right of plan item\n\nproblem: agents report token usage and cost only in comments, so tracking cost per plan item requires reading thread commentary instead of glancing at the item\nexpected: up/down token usage and token cost shown at the bottom-right of each plan item, updating live as further agent calls are dispatched for that item, using the same font/color as the bottom-left “filed by…” text\nactual: token usage and cost live only inside agent run-result comments",
+        "rewritten": true,
+        "stageState": {
+          "stage": "verify",
+          "status": "awaiting_accept",
+          "updatedAt": "2026-06-24T08:40:21.022Z",
+          "history": [
+            {
+              "stage": "analyze",
+              "status": "in_progress",
+              "ts": "2026-06-24T08:28:38.652Z"
+            },
+            {
+              "stage": "analyze",
+              "status": "awaiting_verdict",
+              "ts": "2026-06-24T08:29:02.447Z"
+            },
+            {
+              "stage": "analyze",
+              "status": "awaiting_accept",
+              "ts": "2026-06-24T08:29:22.122Z"
+            },
+            {
+              "stage": "code",
+              "status": "in_progress",
+              "ts": "2026-06-24T08:29:25.260Z"
+            },
+            {
+              "stage": "code",
+              "status": "awaiting_verdict",
+              "ts": "2026-06-24T08:32:17.998Z"
+            },
+            {
+              "stage": "code",
+              "status": "awaiting_accept",
+              "ts": "2026-06-24T08:33:54.529Z"
+            },
+            {
+              "stage": "code",
+              "status": "in_progress",
+              "ts": "2026-06-24T08:35:56.551Z"
+            },
+            {
+              "stage": "code",
+              "status": "awaiting_verdict",
+              "ts": "2026-06-24T08:38:19.561Z"
+            },
+            {
+              "stage": "code",
+              "status": "awaiting_accept",
+              "ts": "2026-06-24T08:38:47.954Z"
+            },
+            {
+              "stage": "verify",
+              "status": "in_progress",
+              "ts": "2026-06-24T08:38:53.544Z"
+            },
+            {
+              "stage": "verify",
+              "status": "awaiting_verdict",
+              "ts": "2026-06-24T08:39:37.782Z"
+            },
+            {
+              "stage": "verify",
+              "status": "awaiting_accept",
+              "ts": "2026-06-24T08:40:21.022Z"
+            }
+          ]
+        }
+      },
+      "description": "**Problem:** Token usage and cost are reported only inside agent run-result comments, so tracking cost per plan item requires reading thread commentary instead of glancing at the item.\n**Expected:** Up/down token usage and token cost shown at the bottom-right of each plan item, updating live as further agent calls dispatch for that item, using the same font/color as the bottom-left \"filed by…\" text.\n**Actual:** Token usage and cost live only inside agent run-result comments.",
+      "tags": [],
+      "runs": [
+        {
+          "status": "success",
+          "ts": "2026-06-24T08:29:02.473Z",
+          "startedAt": "2026-06-24T08:28:38.637Z",
+          "summary": "23.8s · 236→1290 tok",
+          "result": "## fr-107 — analyze\n\n**Problem restated.** Token usage (input/output) and $ cost for a plan item currently live only inside the auto-generated run-summary comment body (`item.comments[]` from `_stampPlanItemRunOutcome`). To track cost per item, the user must open the comment thread and read prose. The user wants an at-a-glance display at the **bottom-right** of each plan item, matching the font/color of the existing bottom-left \"filed by @user · ts\" line, updating live as new runs land.\n\n**Design (validated via brainstorming).** Approach A — cumulative totals only. Server stamps structured numeric `inTok`/`outTok`/`costUsd` fields on each new run outcome; client sums them across `item.runs[]` and renders a compact `↓N ↑N · $X.XXXX` line at bottom-right, wrapped with the filed-by line in a flex row. Existing items (runs stamped before this feature) stay blank — user confirmed only new runs need it.\n\n**Plan.**\n\n1. **Server** (`server/src/attach.js` `_stampPlanItemRunOutcome`, outcome literal ~line 849): Add three numeric fields to the `outcome` object — `inTok`, `outTok`, `costUsd` (raw Number, not the `$`-formatted `costStr`). These are already computed as locals (`u.input_tokens`, `u.output_tokens`, `turnResultEv.totalCostUsd`); the change is adding them as keys on the literal. The existing `summary` string + run-summary comment stay untouched. **verify:** grep shows `inTok`/`outTok`/`costUsd` keys inside the outcome literal; test asserts their presence.\n\n2. **Client** (`web/public/app.js`, plan-item render path ~line 10768 alongside `byLine`): Add a `_usageAgg` IIFE that iterates `it.runs[]`, skips entries where `inTok`/`outTok` aren't numbers (the \"running\" placeholders), sums `inTok` + `outTok` + `costUsd`. Returns `{inTok, outTok, costUsd}` or `null`. When non-null, emit `<div class=\"artifact-item-usage\">↓${inTok} ↑${outTok} · $${costUsd.toFixed(4)}</div>`. Wrap `byLine` + `usageLine` in `<div class=\"artifact-item-foot\">` (flex). Replace the bare `${byLine}` emi"
+        },
+        {
+          "status": "success",
+          "ts": "2026-06-24T08:32:18.009Z",
+          "startedAt": "2026-06-24T08:28:38.637Z",
+          "summary": "172.8s · 10655→7244 tok",
+          "result": "GREEN — 17/17, and all 6 adjacent suites green.\n\n## fr-107 — code\n\n**Changes landed:**\n\n1. **`server/src/attach.js`** (`_stampPlanItemRunOutcome`, outcome literal ~line 849) — Added `inTok`, `outTok`, `costUsd` (raw Number) to the outcome object. Existing `summary` + comment unchanged.\n\n2. **`web/public/app.js`** (plan-item render path ~line 10768) — `_usageAgg` IIFE sums `inTok`/`outTok`/`costUsd` across `it.runs[]`, skipping entries without numeric token fields. Emits `<div class=\"artifact-item-usage\">↓N ↑N · $X.XXXX</div>` when non-null, wrapped with `byLine` in `<div class=\"artifact-item-foot\">`. Replaced `${byLine}` emission with `${footRow}`.\n\n3. **`web/public/styles.css`** — `.artifact-item-foot` (flex, space-between) + `.artifact-item-usage` (11px, var(--muted), italic — matching `.artifact-item-by`).\n\n4. **`test/fr-107-plan-item-usage.test.js`** (new, 17 cases) + `test/test.sh` wiring after `bug-90`.\n\n**TDD evidence:**\n- RED: 7 pass / 10 fail (static guards missing).\n- GREEN: 17 pass / 0 fail.\n- Adjacent suites green: bug-60 (13), bug-34 (10), fr-64 (16), fr-101 (31), bug-90 (9), fr-56 (26).\n\n[stage: code done]"
+        },
+        {
+          "status": "success",
+          "ts": "2026-06-24T08:38:19.572Z",
+          "startedAt": "2026-06-24T08:28:38.637Z",
+          "summary": "143.0s · 8244→6085 tok",
+          "result": "## fr-107 — code (redo, addressing critic)\n\n**Critic claim 1 (ReferenceError) — rejected, with evidence.** The critic misread my analyze note. `_stampPlanItemRunOutcome` declares `const inTok = u.input_tokens || 0;` (attach.js:837) and `const outTok = u.output_tokens || 0;` (attach.js:838). The shorthand `inTok,` / `outTok,` in the outcome literal (lines 861-862) is valid ES6 object shorthand expanding to `inTok: inTok` — references those declared locals. **No ReferenceError. No production code change.** Changing to `inTok: u.input_tokens || 0` would recompute a value already held in a local and diverge from the `summary` string (line 847) which uses `inTok`.\n\n**Critic claim 2 (tautological test) — accepted.** The static `/inTok\\b/` check genuinely can't distinguish a valid shorthand from a dangling reference. Strengthened the test with three new cases:\n- `inTok used in outcome shorthand is a declared local` — greps for `const|let|var inTok =` in the function body.\n- `outTok used in outcome shorthand is a declared local` — same for outTok.\n- `outcome literal evaluates without ReferenceError (sandboxed runtime check)` — extracts the actual outcome literal from the source, evals it via `new Function` with the locals bound, and asserts `outcome.inTok === 1500` etc. If the shorthand were a dangling reference, this eval throws ReferenceError. This is a real runtime catch, not a regex.\n\n**TDD evidence:**\n- Test now 20 cases (was 17), all green.\n- Adjacent suites still green: bug-60 (13), bug-90 (9), fr-101 (31).\n\n[stage: code done]"
+        },
+        {
+          "status": "success",
+          "ts": "2026-06-24T08:39:37.796Z",
+          "startedAt": "2026-06-24T08:28:38.637Z",
+          "summary": "44.2s · 1567→1000 tok",
+          "result": "Verify complete.\n\n## fr-107 — verify\n\n**Verify checklist:**\n\n1. **New test passes + wired in.** `test/fr-107-plan-item-usage.test.js` — 20/20 pass. Wired into `test/test.sh` (grep confirms 1 wiring line) after `bug-90`.\n\n2. **Adjacent suites green — 16 suites, 229 cases total:**\n   - Render-shape (touched `byLine` → `footRow`): bug-60 (13), bug-34 (10), fr-64 (16), fr-101 (31), fr-46 (24), plan-run-comment (4), bug-36 (7), fr-62 (9), bug-86 (7).\n   - Server outcome-stamping path (touched `_stampPlanItemRunOutcome`): bug-90 (9), artifact-sync-from-file (5), bug-74 (10), plan-cache-session-isolation (9).\n   - Plan search/filter: fr-56 (26), fr-102 (19).\n\n3. **No grep-detectable regression.** No other test pins the literal `${byLine}` emission (only fr-107 references it, in its own test). `costUsd` appears only in `server/src/attach.js` (outcome literal) + `web/public/app.js` (aggregator) — no stray references. The `_usageAgg` IIFE + shorthand outcome fields are standard JS; no static-guard concerns (no pipe-to-grep, no direct `rec.mainProject` write, no PTY references).\n\n4. **Critic concern resolved with runtime proof.** The ReferenceError failure mode the critic flagged is now caught by a sandboxed eval test that extracts the actual outcome literal and executes it with locals bound — throws if the shorthand were dangling. The production code was confirmed correct (locals declared at attach.js:837-838), so no code change was needed for claim 1; the test was strengthened for claim 2.\n\n5. **Full `./test/test.sh`.** Not run — the known environmental `agent-config.test.js` 180s budget timeout (`OPENAI_API_KEY` set) aborts the script under `set -e` before reaching the fr-107 wiring line. All 16 adjacent suites pass directly; no new static-guard-shaped patterns introduced.\n\n[stage: verify done]"
+        },
+        {
+          "status": "success",
+          "ts": "2026-06-24T08:40:42.497Z",
+          "startedAt": "2026-06-24T08:28:38.637Z",
+          "summary": "17.3s · 557→259 tok",
+          "result": "fr-107 run complete. Summary of what landed (re-implementation via brainstorming → myco stage flow):\n\n- **`server/src/attach.js`** — `_stampPlanItemRunOutcome` outcome object now carries structured `inTok`, `outTok`, `costUsd` numeric fields (shorthand, backed by declared locals at lines 837-838).\n- **`web/public/app.js`** — plan-item render path computes cumulative usage across `it.runs[]` (skipping \"running\" placeholders), emits `<div class=\"artifact-item-usage\">↓N ↑N · $X.XXXX</div>` wrapped with `byLine` in a `<div class=\"artifact-item-foot\">` flex container.\n- **`web/public/styles.css`** — `.artifact-item-foot` (flex, space-between) + `.artifact-item-usage` (11px, var(--muted), italic — matching `.artifact-item-by`).\n- **`test/fr-107-plan-item-usage.test.js`** (new, 20 cases, including a sandboxed runtime-eval guard for the ReferenceError failure mode) + `test/test.sh` wiring.\n\nChanges are uncommitted, waiting on your explicit commit/push instruction."
+        }
+      ]
     }
   ],
-  "updatedAt": "2026-06-24T03:29:34.137Z"
+  "updatedAt": "2026-06-24T08:28:15.363Z"
 }

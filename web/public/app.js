@@ -10768,6 +10768,35 @@ function renderArtifact(type, artifact) {
     const byLine = it.addedBy
       ? `<div class="artifact-item-by" title="filed by @${escHtml(it.addedBy)} at ${escHtml(it.addedAt || 'unknown')}">filed by @${escHtml(it.addedBy)}${it.addedAt ? ' · ' + escHtml(formatChatTsWithDate(it.addedAt) || it.addedAt) : ''}</div>`
       : '';
+    // fr-107: per-item cumulative token usage + cost at the bottom-right,
+    // matching the filed-by line's font/color. Aggregates across every
+    // completed run in it.runs[] (summing inTok/outTok/costUsd). "running"
+    // placeholder entries from _stampPlanItemStatus lack numeric token
+    // fields and are skipped. Renders nothing when no completed runs have
+    // landed yet, so freshly-filed items don't show an empty "↓0 ↑0 · $0".
+    // Live updates ride the existing artifact state-update broadcast that
+    // fires at the end of _stampPlanItemRunOutcome — no new transport.
+    const _usageAgg = (() => {
+      const runs = Array.isArray(it.runs) ? it.runs : [];
+      let inTok = 0, outTok = 0, costUsd = 0, hasAny = false;
+      for (const r of runs) {
+        if (!r) continue;
+        if (typeof r.inTok !== 'number' || typeof r.outTok !== 'number') continue;
+        inTok += r.inTok;
+        outTok += r.outTok;
+        if (typeof r.costUsd === 'number') costUsd += r.costUsd;
+        hasAny = true;
+      }
+      return hasAny ? { inTok, outTok, costUsd } : null;
+    })();
+    const usageLine = _usageAgg
+      ? `<div class="artifact-item-usage" title="cumulative token usage + cost across completed runs">↓${escHtml(String(_usageAgg.inTok))} ↑${escHtml(String(_usageAgg.outTok))} · $${escHtml(_usageAgg.costUsd.toFixed(4))}</div>`
+      : '';
+    // fr-107: flex wrapper so byLine sits left + usage sits right on the
+    // same row. Empty when neither line is present (legacy items).
+    const footRow = (byLine || usageLine)
+      ? `<div class="artifact-item-foot">${byLine}${usageLine}</div>`
+      : '';
     const mergedFrom = Array.isArray(it.mergedFrom) ? it.mergedFrom : [];
     const mergedBadge = mergedFrom.length
       ? `<span class="artifact-item-merged" title="merged from: ${escHtml(mergedFrom.join(', '))}">⤴ merged from ${mergedFrom.length}</span>`
@@ -10935,7 +10964,7 @@ function renderArtifact(type, artifact) {
         ${_planItemDescriptionHtml(it)}
         ${_planItemDetailsHtml(it)}
       </div>
-      ${byLine}
+      ${footRow}
       ${tagsStrip}
       ${actionsRow}
       ${commentsBlock}

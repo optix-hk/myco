@@ -852,6 +852,15 @@ function _stampPlanItemRunOutcome(sessionId, itemId, turnResultEv, startedAt) {
     startedAt: startedAt || null,
     summary,
     result: turnResultEv.result ? String(turnResultEv.result).slice(0, 2000) : null,
+    // fr-107: structured numeric token/cost fields so the plan-item UI
+    // can aggregate cumulative per-item usage without parsing the
+    // summary string. `costUsd` is the raw Number (not the $-formatted
+    // `costStr`) so sums stay numeric. "running" placeholder entries
+    // from _stampPlanItemStatus lack these fields and are skipped by
+    // the aggregator.
+    inTok,
+    outTok,
+    costUsd: (typeof turnResultEv.totalCostUsd === 'number') ? turnResultEv.totalCostUsd : 0,
   };
   const last = item.runs[item.runs.length - 1];
   if (last && last.status === 'running') {

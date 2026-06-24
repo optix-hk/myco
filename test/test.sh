@@ -4846,6 +4846,15 @@ test_chat_window() {
   # inline ref-impl proves runs[] + run-summary comments survive a
   # file-first reload (plus a pre-fix sentinel that documents the loss).
   node_test_result test/bug-90-runs-persist-to-file.test.js "test/bug-90-runs-persist-to-file.test.js (9 cases)"
+  # 2026-06-24 fr-107: per-item token usage + cost at the bottom-right
+  # of each plan item, matching the filed-by line's font/color, updating
+  # live as further agent calls land. Test pins: server stores structured
+  # inTok/outTok/costUsd on the outcome object (not just the summary
+  # string); app.js aggregates cumulatively across it.runs[] (skipping
+  # "running" placeholders) and emits .artifact-item-usage wrapped in
+  # .artifact-item-foot; CSS matches .artifact-item-by font-size + color;
+  # inline ref-impl covers cumulative sum, placeholder skip, no-runs case.
+  node_test_result test/fr-107-plan-item-usage.test.js "test/fr-107-plan-item-usage.test.js (20 cases)"
   # 2026-05-17 chat persistence + cross-device + ordering contract.
   # Locks the four pillars documented in CLAUDE.md → "Chat persistence
   # & cross-device consistency": (1) every device sees identical
