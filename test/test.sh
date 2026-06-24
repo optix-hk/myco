@@ -4835,6 +4835,17 @@ test_chat_window() {
   # where /feature rejected sessions instantiated with a folder-name main
   # project wrapping a git repo.
   node_test_result test/bug-89-nested-repo-detect.test.js "test/bug-89-nested-repo-detect.test.js (4 cases)"
+  # 2026-06-24 bug-90: browser refresh reverted plan items with
+  # successful runs to their initial state. Root cause: _stampPlanItemStatus
+  # and _stampPlanItemRunOutcome (server/src/attach.js) called
+  # sessionsMod.saveStore() (persists to /data/sessions.json) but never
+  # mirrored the runs[] + run-summary comments to _myco_/plan.json, which
+  # _sendAttachSnapshot reads file-first on refresh. Test pins:
+  # persistArtifact is a public export of artifacts.js, both _stamp*
+  # functions call persistArtifact(rec, "plan", planArtifact), and an
+  # inline ref-impl proves runs[] + run-summary comments survive a
+  # file-first reload (plus a pre-fix sentinel that documents the loss).
+  node_test_result test/bug-90-runs-persist-to-file.test.js "test/bug-90-runs-persist-to-file.test.js (9 cases)"
   # 2026-05-17 chat persistence + cross-device + ordering contract.
   # Locks the four pillars documented in CLAUDE.md → "Chat persistence
   # & cross-device consistency": (1) every device sees identical

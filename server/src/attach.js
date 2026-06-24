@@ -743,7 +743,11 @@ function _stampPlanItemStatus(sessionId, itemId, status, summary) {
   });
   // Cap runs[] at the last 10 so a busy item doesn't bloat plan.json.
   if (item.runs.length > 10) item.runs = item.runs.slice(-10);
-  sessionsMod.saveStore();
+  // bug-90: persistArtifact (not just saveStore) so the runs[] entry is
+  // mirrored to _myco_/plan.json — the file _sendAttachSnapshot reads
+  // file-first on browser refresh. Pre-bug-90 the file missed this
+  // write, and refresh reverted the item to its pre-run state.
+  require('./artifacts').persistArtifact(rec, 'plan', planArtifact);
   const session = sessions.get(sessionId);
   if (session && typeof session.emit === 'function') {
     session.emit('state-update', { kind: 'artifact', artifactType: 'plan', artifact: planArtifact });
@@ -885,7 +889,12 @@ function _stampPlanItemRunOutcome(sessionId, itemId, turnResultEv, startedAt) {
   // chatty item doesn't bloat plan.json. Oldest dropped first.
   if (item.comments.length > 50) item.comments = item.comments.slice(-50);
 
-  sessionsMod.saveStore();
+  // bug-90: persistArtifact (not just saveStore) so the run outcome +
+  // run-summary comment are mirrored to _myco_/plan.json — the file
+  // _sendAttachSnapshot reads file-first on browser refresh. Pre-bug-90
+  // the file missed these writes, and refresh reverted items with
+  // successful runs to their initial state (runs[] + comments gone).
+  require('./artifacts').persistArtifact(rec, 'plan', planArtifact);
   const session = sessions.get(sessionId);
   if (session && typeof session.emit === 'function') {
     session.emit('state-update', { kind: 'artifact', artifactType: 'plan', artifact: planArtifact });

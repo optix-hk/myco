@@ -589,7 +589,7 @@
     },
     {
       "id": "fr-7",
-      "text": "**Problem:** Users miss chat events that require their attention when the browser tab isn't focused.\n**Expected:** Promote in-chat notifications to the browser level so the OS surfaces them natively.\n**Actual:** Notifications stay confined to the chat UI and are only visible when the user is already looking at it.",
+      "text": "**Problem:** Users miss chat events that require their attention when the browser tab isn't focused.\n**Expected:** Promote in-chat notifications to the browser level so the OS surfaces them natively.\n**Actual:** Notifications stay confined to the chat UI and are only visible when the user is already looking at it.\n\n— merged from `fr-103` (added by @foster-chen): Send native notifications to device when myco is in foreground/background",
       "layer": "Feature",
       "done": false,
       "addedAt": "2026-05-16T13:41:23.687Z",
@@ -621,6 +621,9 @@
           "ts": "2026-05-16T13:45:55.994Z",
           "summary": null
         }
+      ],
+      "mergedFrom": [
+        "fr-103"
       ]
     },
     {
@@ -6368,22 +6371,79 @@
       "tags": []
     },
     {
-      "id": "fr-103",
-      "text": "Send native notifications to device when myco is in foreground/background",
+      "id": "fr-104",
+      "text": "Add light UI mode toggle in config menu",
       "layer": "Feature",
       "done": false,
-      "addedAt": "2026-06-22T09:35:46.322Z",
+      "addedAt": "2026-06-24T01:10:52.640Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [
+        "foster-chen"
+      ],
+      "comments": [],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "add a light UI mode that can be changed from the config menu (cog wheel button). Currently only dark mode.",
+        "rewritten": true
+      },
+      "description": "**Problem:** Only dark mode is available; users who prefer a light theme have no option.\n**Expected:** A light UI mode selectable from the config menu (cog wheel button).\n**Actual:** UI is dark-only with no theme toggle.",
+      "tags": []
+    },
+    {
+      "id": "fr-105",
+      "text": "Add @user dropdown in \"Search plan items\" bar on ampersand entry (FR-102)",
+      "layer": "Feature",
+      "done": true,
+      "addedAt": "2026-06-24T03:16:36.480Z",
       "addedBy": "foster-chen",
       "source": "user",
       "voters": [],
       "comments": [],
       "meta": {
         "rewriteRequested": "long",
-        "originalText": "sends notification to device with myco open in foreground/background when they receive messages directed to them (i.e. ampersand+username) and when tool perm window pops up. Expected: MacOS/iOS/Windows receive notification wherever the user is doing currently so that they can swiftly grant/manage relevant settings. Current: no notifications",
+        "originalText": "expand on fr-102, when ampersand is entered into \"Search plan items\" search bar, show a dropdown menu for user id selection (similar to the menu that pops up when ampersand is entered into session message send area)",
         "rewritten": true
       },
-      "description": "**Problem:** Users don't get notified when they receive directed messages (ampersand+username) or when a tool permission window pops up.\n**Expected:** macOS/iOS/Windows receive native notifications wherever the user currently is, so they can swiftly grant/manage relevant settings.\n**Actual:** No notifications are sent."
+      "description": "**Problem:** The \"Search plan items\" search bar has no way to filter by user, unlike the session message send area which shows a user-selection menu on `&` entry.\n**Expected:** When a user types `&` into the \"Search plan items\" search bar, show a dropdown menu for user id selection, matching the behavior of the session message send area.\n**Actual:** Typing `&` in the \"Search plan items\" bar does nothing — no user-selection dropdown appears.\n**Context:** Extends FR-102. Reuse the dropdown component/trigger logic from the session message send area's ampersand menu."
+    },
+    {
+      "id": "fr-106",
+      "text": "FR-102: Add @-mention user picker dropdown in Search plan items bar",
+      "layer": "Feature",
+      "done": false,
+      "addedAt": "2026-06-24T03:18:54.598Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [],
+      "comments": [],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "expand on fr-102, when \"@\" is entered into \"Search plan items\" search bar, show a dropdown menu for user id selection (similar to the menu that pops up when\"@\" is entered into session message send area). Currently, user need to manually enter the correct \n\"@userid\"",
+        "rewritten": true
+      },
+      "description": "**Problem:** When typing \"@\" into the \"Search plan items\" bar, users must manually type the exact \"@userid\" with no assistance.\n**Expected:** Typing \"@\" shows a dropdown menu for user id selection, mirroring the @-mention picker in the session message send area.\n**Actual:** No dropdown appears; the user must enter the correct \"@userid\" by hand.\n**Context:** Expands FR-102. Reference implementation: the existing @-mention dropdown in the session message send area."
+    },
+    {
+      "id": "bug-90",
+      "text": "Browser refresh reverts plan items with successful runs to initial state",
+      "layer": "Bug",
+      "done": false,
+      "addedAt": "2026-06-24T03:24:40.268Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [
+        "foster-chen"
+      ],
+      "comments": [],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "refreshing browser will cause plan items with successful runs (will have \"done\" marked next to the vote icon) get reverted back to its initial state. Expected: plan item state should be independent of user browser refresh, the server's myco-state should be sole source of truth unaffected by browser activity/cache",
+        "rewritten": true
+      },
+      "description": "**Problem:** Refreshing the browser causes plan items with successful runs (marked \"done\" next to the vote icon) to revert to their initial state.\n**Expected:** Plan item state should be independent of browser refresh; the server's myco-state should be the sole source of truth, unaffected by browser activity/cache.\n**Actual:** Successful run state is lost on refresh, reverting to the initial state.",
+      "tags": []
     }
   ],
-  "updatedAt": "2026-06-22T09:35:56.667Z"
+  "updatedAt": "2026-06-24T03:29:34.137Z"
 }

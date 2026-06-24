@@ -1303,6 +1303,14 @@ module.exports = {
   AUTO_EXECUTE_VOTE_THRESHOLD,
   buildArtifactRunText,
   buildArtifactQuorumText,
+  // bug-90: persistArtifact promoted to the public surface so attach.js's
+  // _stampPlanItemStatus + _stampPlanItemRunOutcome can mirror runs[] +
+  // run-summary comments to _myco_/plan.json — not just saveStore()
+  // (which only persists to /data/sessions.json). Pre-bug-90 the file
+  // missed those entries, and _sendAttachSnapshot's file-first read on
+  // browser refresh reverted items with successful runs to their
+  // initial state.
+  persistArtifact,
   // fr-94 Phase 1: resolveMycoDir + findProjectRoot promoted to public
   // exports so OTHER server modules (agent-session.js, critique.js,
   // index.js) stop hand-rolling `path.join(absCwd, '_myco_', …)` —
