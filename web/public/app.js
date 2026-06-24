@@ -10655,7 +10655,15 @@ function renderArtifact(type, artifact) {
       const why = [];
       if (planOpenOnly) why.push('<strong>Open only</strong>');
       if (planTypes && planTypes.length < 3) why.push('<strong>type filter</strong>');
-      if (planSearch) why.push(`<strong>search "${escHtml(planSearch)}"</strong>`);
+      // fr-102: split the @<username> filter out of the search query so
+      // the user sees it as its own chip with the @username rendered in
+      // blue (per @foster-chen's request). The remaining keyword text,
+      // if any, gets the existing `search "…"` chip.
+      if (planSearch) {
+        const { user, keyword } = _parsePlanSearchQuery(planSearch);
+        if (user) why.push(`user <span class="plan-search-user-token">${escHtml('@' + user)}</span>`);
+        if (keyword) why.push(`<strong>search "${escHtml(keyword)}"</strong>`);
+      }
       const whyText = why.length ? ` after applying ${why.join(' + ')}` : '';
       body.innerHTML = `<div class="artifact-empty">No items match${whyText}. ${items.length} total item(s) in the plan.</div>`;
     }
@@ -10759,6 +10767,35 @@ function renderArtifact(type, artifact) {
     // was tracked) render with no line at all.
     const byLine = it.addedBy
       ? `<div class="artifact-item-by" title="filed by @${escHtml(it.addedBy)} at ${escHtml(it.addedAt || 'unknown')}">filed by @${escHtml(it.addedBy)}${it.addedAt ? ' · ' + escHtml(formatChatTsWithDate(it.addedAt) || it.addedAt) : ''}</div>`
+      : '';
+    // fr-107: per-item cumulative token usage + cost at the bottom-right,
+    // matching the filed-by line's font/color. Aggregates across every
+    // completed run in it.runs[] (summing inTok/outTok/costUsd). "running"
+    // placeholder entries from _stampPlanItemStatus lack numeric token
+    // fields and are skipped. Renders nothing when no completed runs have
+    // landed yet, so freshly-filed items don't show an empty "↓0 ↑0 · $0".
+    // Live updates ride the existing artifact state-update broadcast that
+    // fires at the end of _stampPlanItemRunOutcome — no new transport.
+    const _usageAgg = (() => {
+      const runs = Array.isArray(it.runs) ? it.runs : [];
+      let inTok = 0, outTok = 0, costUsd = 0, hasAny = false;
+      for (const r of runs) {
+        if (!r) continue;
+        if (typeof r.inTok !== 'number' || typeof r.outTok !== 'number') continue;
+        inTok += r.inTok;
+        outTok += r.outTok;
+        if (typeof r.costUsd === 'number') costUsd += r.costUsd;
+        hasAny = true;
+      }
+      return hasAny ? { inTok, outTok, costUsd } : null;
+    })();
+    const usageLine = _usageAgg
+      ? `<div class="artifact-item-usage" title="cumulative token usage + cost across completed runs">↓${escHtml(String(_usageAgg.inTok))} ↑${escHtml(String(_usageAgg.outTok))} · $${escHtml(_usageAgg.costUsd.toFixed(4))}</div>`
+      : '';
+    // fr-107: flex wrapper so byLine sits left + usage sits right on the
+    // same row. Empty when neither line is present (legacy items).
+    const footRow = (byLine || usageLine)
+      ? `<div class="artifact-item-foot">${byLine}${usageLine}</div>`
       : '';
     const mergedFrom = Array.isArray(it.mergedFrom) ? it.mergedFrom : [];
     const mergedBadge = mergedFrom.length
@@ -10927,7 +10964,7 @@ function renderArtifact(type, artifact) {
         ${_planItemDescriptionHtml(it)}
         ${_planItemDetailsHtml(it)}
       </div>
-      ${byLine}
+      ${footRow}
       ${tagsStrip}
       ${actionsRow}
       ${commentsBlock}
@@ -14569,16 +14606,50 @@ function _planItemStatusChipHtml(status) {
 //   - types: keep only items whose .layer is in the allowed set
 //     (null = no filter; empty array = filter out everything)
 //   - search: case-insensitive substring across id + text + body
+// fr-102: parse a `@<username>` token out of a plan-search query. The
+// first `@[a-z0-9_-]+` match becomes a structured user filter (matched
+// case-insensitively against it.addedBy); the rest of the query, with
+// the `@user` token stripped, is returned as the keyword substring so
+// existing keyword behavior is preserved. Returns { user, keyword }.
+//
+// Examples:
+//   "@foster-chen"           → { user: 'foster-chen', keyword: '' }
+//   "@foster-chen dark mode" → { user: 'foster-chen', keyword: 'dark mode' }
+//   "dark mode @foster-chen" → { user: 'foster-chen', keyword: 'dark mode' }
+//   "dark mode"              → { user: null,     keyword: 'dark mode' }
+//   ""                       → { user: null,     keyword: '' }
+const PLAN_SEARCH_USER_TOKEN_RE = /@([a-z0-9_-]+)/i;
+
+function _parsePlanSearchQuery(rawSearch) {
+  const raw = String(rawSearch || '').trim();
+  if (!raw) return { user: null, keyword: '' };
+  const m = raw.match(PLAN_SEARCH_USER_TOKEN_RE);
+  if (!m) return { user: null, keyword: raw.toLowerCase() };
+  const user = m[1].toLowerCase();
+  // Remove the first `@user` occurrence (use a non-global regex so we
+  // only strip the first match — same semantics as the .match() above).
+  const remainder = raw.replace(PLAN_SEARCH_USER_TOKEN_RE, ' ').replace(/\s+/g, ' ').trim();
+  return { user, keyword: remainder.toLowerCase() };
+}
+
 function _filterPlanItems(items, opts) {
   const { openOnly, types, search } = (opts || {});
   const typeSet = Array.isArray(types) ? new Set(types) : null;
-  const q = String(search || '').trim().toLowerCase();
+  const { user, keyword: q } = _parsePlanSearchQuery(search);
   return (items || []).filter((it) => {
     if (!it) return false;
     if (openOnly && it.done) return false;
     if (typeSet && it.layer && !typeSet.has(it.layer)) return false;
     // Items without a `layer` (forward-compat or extractor edge cases)
     // pass the type filter — better to surface than to hide.
+    // fr-102: @<username> filter — compare case-insensitively against
+    // it.addedBy. Items without addedBy don't match any user filter
+    // (but still pass when no user filter is active, same forward-
+    // compat as the layer check above).
+    if (user) {
+      const by = String(it.addedBy || '').toLowerCase();
+      if (by !== user) return false;
+    }
     if (q) {
       const hay = ((it.id || '') + ' ' + (it.text || '') + ' ' + (it.body || '')).toLowerCase();
       if (!hay.includes(q)) return false;

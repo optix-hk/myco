@@ -2344,6 +2344,11 @@ html.sidebar-collapsed { --chatpane-w: calc(100vw / 2); }
   border-color: rgba(80, 120, 200, .55);
   background: rgba(255,255,255,.06);
 }
+/* fr-102: @<username> token rendered inside the "no items match"
+   summary line. The @ and username are colored blue so the user can
+   visually distinguish the structured user filter from the keyword
+   search chip. */
+.plan-search-user-token { color: #2563eb; font-weight: 600; }
 /* Mobile: stack the chips on their own line above the search input
    so neither gets squeezed. */
 @media (max-width: 600px) {
@@ -2806,6 +2811,27 @@ html.sidebar-collapsed { --chatpane-w: calc(100vw / 2); }
   font-style: italic;
   margin: 4px 0 2px 0;
   padding-left: 2px;
+}
+/* fr-107: flex row holding the filed-by line (left) + per-item token
+ * usage + cost (right). byLine + usageLine sit on the same row so the
+ * bottom-left "filed by..." and bottom-right "↓in ↑out · $cost" read
+ * as a single meta strip. Empty when neither line is present. */
+.artifact-item-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin: 4px 0 2px 0;
+  padding-left: 2px;
+}
+/* fr-107: per-item cumulative token usage + cost at the bottom-right.
+ * Same font-size + color as .artifact-item-by so the two halves of the
+ * meta strip read consistently. italic to match the filed-by tone. */
+.artifact-item-usage {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  white-space: nowrap;
 }
 /* fr-101: plan-item tags strip — chip pills under the body, before
    the actions row. Wraps when many tags pile up. Chips reuse the

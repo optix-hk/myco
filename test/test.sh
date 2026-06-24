@@ -2865,7 +2865,17 @@ test_chat_window() {
   # bindings, plus inline behavior simulation of _filterPlanItems so
   # the substring/type/done/intersect semantics are pinned without a
   # browser.
-  node_test_result test/fr-56-plan-filter-search.test.js "test/fr-56-plan-filter-search.test.js (20 cases)"
+  node_test_result test/fr-56-plan-filter-search.test.js "test/fr-56-plan-filter-search.test.js (26 cases — incl. 6 fr-102 @user filter cases)"
+  # fr-102: @<username> structured user-filter token in the plan-search
+  # query. Typing `@<login>` narrows to items filed by that user
+  # (it.addedBy, case-insensitive); any text after the @user token
+  # continues as a normal keyword substring. The @username renders blue
+  # in the "no items match" summary line (per @foster-chen's "render
+  # ampersand and username blue" comment). Pins _parsePlanSearchQuery,
+  # _filterPlanItems' @user handling, the summary-line span emission,
+  # and the .plan-search-user-token CSS rule. The fr-56 test was also
+  # extended with 6 twinned-ref @user behavior cases.
+  node_test_result test/fr-102-plan-search-user-filter.test.js "test/fr-102-plan-search-user-filter.test.js (19 cases)"
   # fr-65: per-layer "▶ N closed (tap to expand)" accordion that rolls
   # done plan items into a collapsible footer beneath each layer's open
   # items. Replaces the all-or-nothing bug-15 "Open only" toggle with
@@ -4814,6 +4824,37 @@ test_chat_window() {
   # github.js back-compat shim's user-level setToken path so the OAuth
   # callback keeps working.
   node_test_result test/gitee-host-dispatch.test.js "test/gitee-host-dispatch.test.js (31 cases)"
+  # bug-89: detectHost falls back to immediate non-dot children when the
+  # session's cwd is a wrapper folder (not itself a git repo) containing
+  # a git repo at a subdirectory like `cwd/myco`. Locks the four shapes:
+  # wrapper+github-child resolves, wrapper+gitee-child resolves
+  # (provider-agnostic), wrapper with no git-child returns null (dot-dirs
+  # skipped, no false positives), and a wrapper that IS itself a git repo
+  # with a recognized remote prefers the direct cwd over a nested child
+  # (no surprise fallback). Would have caught the original regression
+  # where /feature rejected sessions instantiated with a folder-name main
+  # project wrapping a git repo.
+  node_test_result test/bug-89-nested-repo-detect.test.js "test/bug-89-nested-repo-detect.test.js (4 cases)"
+  # 2026-06-24 bug-90: browser refresh reverted plan items with
+  # successful runs to their initial state. Root cause: _stampPlanItemStatus
+  # and _stampPlanItemRunOutcome (server/src/attach.js) called
+  # sessionsMod.saveStore() (persists to /data/sessions.json) but never
+  # mirrored the runs[] + run-summary comments to _myco_/plan.json, which
+  # _sendAttachSnapshot reads file-first on refresh. Test pins:
+  # persistArtifact is a public export of artifacts.js, both _stamp*
+  # functions call persistArtifact(rec, "plan", planArtifact), and an
+  # inline ref-impl proves runs[] + run-summary comments survive a
+  # file-first reload (plus a pre-fix sentinel that documents the loss).
+  node_test_result test/bug-90-runs-persist-to-file.test.js "test/bug-90-runs-persist-to-file.test.js (9 cases)"
+  # 2026-06-24 fr-107: per-item token usage + cost at the bottom-right
+  # of each plan item, matching the filed-by line's font/color, updating
+  # live as further agent calls land. Test pins: server stores structured
+  # inTok/outTok/costUsd on the outcome object (not just the summary
+  # string); app.js aggregates cumulatively across it.runs[] (skipping
+  # "running" placeholders) and emits .artifact-item-usage wrapped in
+  # .artifact-item-foot; CSS matches .artifact-item-by font-size + color;
+  # inline ref-impl covers cumulative sum, placeholder skip, no-runs case.
+  node_test_result test/fr-107-plan-item-usage.test.js "test/fr-107-plan-item-usage.test.js (20 cases)"
   # 2026-05-17 chat persistence + cross-device + ordering contract.
   # Locks the four pillars documented in CLAUDE.md → "Chat persistence
   # & cross-device consistency": (1) every device sees identical
