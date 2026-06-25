@@ -122,7 +122,17 @@ function _isKnownChatUser(word) {
 // "talk-to-claude" prefix is gone — every chat message reaches claude
 // by default; only the head-of-message mention syntax is special.)
 function _detectMentionTarget(text) {
-  const m = String(text || '').match(/^@([A-Za-z][\w-]{0,30})\b/);
+  const s = String(text || '');
+  // bug-91: @<numeric-only> (e.g. `@771805315 hi`) is mention-shaped — the
+  // user is calling out a numeric user id, not prompting claude. The numeric
+  // token isn't a known chat user, but returning it here makes the existing
+  // `if (mentionTarget) return;` gate in handleChatMessage fire so claude
+  // stays silent. Pre-bug-91 the regex required a letter-first token, so
+  // numeric-only @tokens returned null and fell through to claude routing.
+  // Cap at 30 digits to reject pathological inputs.
+  const numMatch = s.match(/^@(\d{1,30})\b/);
+  if (numMatch) return numMatch[1];
+  const m = s.match(/^@([A-Za-z][\w-]{0,30})\b/);
   if (!m) return null;
   const w = m[1].toLowerCase();
   if (w === 'all') return 'all';   // broadcast mention — see fr-3

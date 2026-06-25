@@ -4855,6 +4855,16 @@ test_chat_window() {
   # .artifact-item-foot; CSS matches .artifact-item-by font-size + color;
   # inline ref-impl covers cumulative sum, placeholder skip, no-runs case.
   node_test_result test/fr-107-plan-item-usage.test.js "test/fr-107-plan-item-usage.test.js (20 cases)"
+  # bug-91: @<numeric-only> mention tokens (e.g. `@771805315 hi`) falsely
+  # routed to claude because _detectMentionTarget's regex required a letter-
+  # first token, so numeric-only @tokens returned null and the
+  # `if (mentionTarget) return;` suppression gate in handleChatMessage never
+  # fired. Test pins: _detectMentionTarget has a /^@(\d{1,30})\b/ numeric
+  # branch that returns the digit token (non-null); handleChatMessage keeps
+  # the suppression gate after the chat broadcast; inline ref-impl covers
+  # numeric-only, @all, known/unknown letter-first, alphanumeric-digit-first
+  # (out of scope), head-of-message anchoring, and the 30-digit cap.
+  node_test_result test/bug-91-numeric-mention-suppression.test.js "test/bug-91-numeric-mention-suppression.test.js (15 cases)"
   # 2026-05-17 chat persistence + cross-device + ordering contract.
   # Locks the four pillars documented in CLAUDE.md → "Chat persistence
   # & cross-device consistency": (1) every device sees identical
