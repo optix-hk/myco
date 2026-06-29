@@ -6879,7 +6879,180 @@
           "costUsd": 3.002608
         }
       ]
+    },
+    {
+      "id": "fr-111",
+      "text": "Allow users to set an alias that replaces numeric ID in @-mentions",
+      "layer": "Feature",
+      "done": false,
+      "addedAt": "2026-06-25T04:26:40.271Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [],
+      "comments": [
+        {
+          "id": "a84c4439e90c",
+          "user": "foster-chen",
+          "text": "allow no special characters or space in the alias, only allow alphabetical and numeric characters, dash, underline",
+          "ts": "2026-06-25T04:28:18.142Z"
+        }
+      ],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "allow users to create alias. Example: people with pure numerical id might be confusing and they might not know which number is the user they are looking to \"@\". Users with alias set (via the top-left config (cog) button) will now be recognized ONLY by its alias; the pop-up window when \"@\" is entered will now only show his/her alias, his/her original id is now hidden from the \"@\" related behaviors",
+        "rewritten": true
+      },
+      "description": "**Problem:** Users with pure numerical IDs are hard to distinguish when @-mentioning, since participants can't tell which number maps to whom.\n**Expected:** Users can set an alias via the top-left config (cog) button. Once set, they are recognized ONLY by their alias: the @-mention pop-up shows only the alias, and the original ID is hidden from all @-related behaviors.\n**Actual:** No alias mechanism exists; users are identified and surfaced by their raw numeric ID in @-mention flows.",
+      "tags": []
+    },
+    {
+      "id": "td-44",
+      "text": "change default critic model from Gemini to OpenAI",
+      "layer": "Todo",
+      "done": false,
+      "addedAt": "2026-06-25T06:08:41.890Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [],
+      "comments": []
+    },
+    {
+      "id": "bug-92",
+      "text": "Voice input and meeting upload buttons missing on first webUI visit",
+      "layer": "Bug",
+      "done": false,
+      "addedAt": "2026-06-25T08:51:33.458Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [],
+      "comments": [],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "voice input and meeting upload button does not appear for users' first visit of the webUI, they only show up after refresh at least once. Should show up directly.",
+        "rewritten": true
+      },
+      "description": "**Problem:** Voice input and meeting upload buttons do not appear on a user's first visit to the webUI; they only show up after at least one refresh.\n**Expected:** Buttons should render directly on the initial visit without requiring a refresh.\n**Actual:** Buttons are absent on first load and only appear after the page is refreshed."
+    },
+    {
+      "id": "bug-93",
+      "text": "/git command fails with \"not a git repository\" (exit 128) when repo is in subfolder",
+      "layer": "Bug",
+      "done": false,
+      "addedAt": "2026-06-29T02:54:29.169Z",
+      "addedBy": "foster-chen",
+      "source": "user",
+      "voters": [
+        "foster-chen"
+      ],
+      "comments": [
+        {
+          "id": "be4ee6a0dc43",
+          "user": "claude",
+          "text": "✓ I have enough context for the analyze stage. · 88.8s · $0.4317 · 45662↓/2746↑",
+          "ts": "2026-06-29T02:56:28.449Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-29T02:54:59.007Z"
+          }
+        },
+        {
+          "id": "fa669d16e736",
+          "user": "claude",
+          "text": "✓ Code stage complete for bug-93: · 473.6s · $1.5309 · 24683↓/14786↑",
+          "ts": "2026-06-29T03:05:25.364Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-29T02:54:59.007Z"
+          }
+        },
+        {
+          "id": "cdc66d251222",
+          "user": "claude",
+          "text": "✓ Verify stage complete for bug-93: · 32.8s · $1.7006 · 1629↓/1039↑",
+          "ts": "2026-06-29T03:11:30.704Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-29T02:54:59.007Z"
+          }
+        },
+        {
+          "id": "4da53c34c1d7",
+          "user": "claude",
+          "text": "✓ bug-93 run complete. Code on disk in the session workspace (`server/src/slashcmds.js` + `test/bug-93-git-subfolder-repo.test.js` + `test/te… · 6.7s · $1.7491 · 274↓/58↑",
+          "ts": "2026-06-29T03:13:32.849Z",
+          "meta": {
+            "kind": "run-summary",
+            "runStartedAt": "2026-06-29T02:54:59.007Z"
+          }
+        }
+      ],
+      "meta": {
+        "rewriteRequested": "long",
+        "originalText": "/git command shows not a git repository exit 128 in sessions instantiated with git. Folder structure:\n\noptix@DESKTOP-PTFQ8B3:~/myco-state/wks/foster-chen/myco-foster-chen-eca6ed8d$ tree -L 1\n.\n└── OptixAgentCore\n\nwhere the sub-folder is the git repo",
+        "rewritten": true,
+        "stageState": {
+          "stage": "analyze",
+          "status": "awaiting_verdict",
+          "updatedAt": "2026-06-29T02:56:28.424Z",
+          "history": [
+            {
+              "stage": "analyze",
+              "status": "in_progress",
+              "ts": "2026-06-29T02:54:59.025Z"
+            },
+            {
+              "stage": "analyze",
+              "status": "awaiting_verdict",
+              "ts": "2026-06-29T02:56:28.424Z"
+            }
+          ]
+        }
+      },
+      "description": "**Problem:** `/git` command reports \"not a git repository\" exit 128 in sessions that should be git-enabled.\n**Expected:** `/git` detects the repository and runs successfully.\n**Actual:** Running `/git` errors out with exit 128, \"not a git repository\".\n**Context:** Folder layout is `~/myco-state/wks/foster-chen/myco-foster-chen-eca6ed8d/OptixAgentCore`, where the `OptixAgentCore` subfolder is the actual git repo; the parent is not.",
+      "tags": [],
+      "runs": [
+        {
+          "status": "success",
+          "ts": "2026-06-29T02:56:28.449Z",
+          "startedAt": "2026-06-29T02:54:59.007Z",
+          "summary": "88.8s · 45662→2746 tok",
+          "result": "I have enough context for the analyze stage.\n\n## bug-93 — analyze stage\n\n### Problem restated\n`/git <args>` spawns `git` with `cwd: rec.absCwd` (slashcmds.js:2188-2189) — the session workspace root. When the actual git repository lives in an immediate subfolder (e.g. `~/myco-state/wks/foster-chen/myco-foster-chen-eca6ed8d/OptixAgentCore` where `OptixAgentCore` is the repo and the parent is just a wrapper), `git` runs against the wrapper, which is not a repo → `fatal: not a git repository (or any of the parent directories): .git` → exit 128. The same class of bug as bug-89, but bug-89 only fixed `detectHost` (used by `/feature`, `/bug`, `/setpat`, `/listpat`) — `/git` was never routed through that fallback.\n\n### Numbered plan\n\n1. **Add `_resolveGitCwd(absCwd)` helper in `server/src/slashcmds.js`** (sibling to the existing `handleGit`). Mirror bug-89's `detectHost` shape: try `git -C <absCwd> rev-parse --show-toplevel` first; on failure (non-zero exit), walk immediate non-dot children of `absCwd` (cap `NESTED_REPO_MAX_CHILDREN = 50`, one level deep — same constant bug-89 uses), return the first child whose `git -C <child> rev-parse --show-toplevel` succeeds. Fall back to `absCwd` itself if nothing matches, so `/git` still surfaces git's native error for genuinely non-repo sessions.\n   - **verify:** `grep -n \"_resolveGitCwd\" server/src/slashcmds.js` shows the helper; `node -e \"require('./server/src/slashcmds')._resolveGitCwd\"` (if exported) or a static-read test confirms shape.\n\n2. **Refactor `handleGit` to await `_resolveGitCwd(rec.absCwd)` before spawning.** `handleGit` becomes `async` (its call sites in `COMMANDS[].handler` already support promises — verify via `grep -n \"handleGit\\|handler:\" server/src/slashcmds.js`). Spawn `git` with `cwd: gitCwd` instead of `cwd: rec.absCwd`. Add a one-line `(running in <subfolder>…)` note to the reply ONLY when `gitCwd !== rec.absCwd` so the user understands why the path differs.\n   - **verify:** `grep -n \"cwd: gitCwd\\|_resolveGi",
+          "inTok": 45662,
+          "outTok": 2746,
+          "costUsd": 0.43167999999999995
+        },
+        {
+          "status": "success",
+          "ts": "2026-06-29T03:05:25.364Z",
+          "startedAt": "2026-06-29T02:54:59.007Z",
+          "summary": "473.6s · 24683→14786 tok",
+          "result": "Code stage complete for bug-93:\n- **Production source**: `server/src/slashcmds.js`\n  - Added `_resolveGitCwd(absCwd)` helper (lines ~2148-2184): probes `git -C <absCwd> rev-parse --show-toplevel`; on failure walks immediate non-dot children (cap 50, mirror bug-89's `NESTED_REPO_MAX_CHILDREN`), returns first child whose `rev-parse` succeeds; falls back to `absCwd` so git's native \"not a repository\" error still surfaces for genuinely non-repo sessions.\n  - `handleGit` is now `async`, awaits `_resolveGitCwd(rec.absCwd)`, spawns with `cwd: gitCwd` (not `rec.absCwd`), emits a one-line subfolder note when `gitCwd !== rec.absCwd`.\n  - Exported `_resolveGitCwd` on `module.exports`.\n  - Added top-level `fsp` + `nodePath` requires.\n- **Regression test**: `test/bug-93-git-subfolder-repo.test.js` (16 cases) — 10 static pins on source shape + 6 behavior cases against real filesystem (mkdtemp + `git init`).\n- **Wired into `test/test.sh`** after the bug-91 block.\n- **RED → GREEN**: 16 failures pre-fix → 16 passes post-fix (one test regex adjusted to match the Promise-based `resolve(absCwd)` fallback shape).\n- **Adjacent suites green**: bug-89-nested-repo-detect (4), bug-91 (14), chat-routing (8), fr-107 (20).\n\n[stage: code done]",
+          "inTok": 24683,
+          "outTok": 14786,
+          "costUsd": 1.5308569999999997
+        },
+        {
+          "status": "success",
+          "ts": "2026-06-29T03:11:30.704Z",
+          "startedAt": "2026-06-29T02:54:59.007Z",
+          "summary": "32.8s · 1629→1039 tok",
+          "result": "Verify stage complete for bug-93:\n- **New test wired into `test/test.sh`** (line 4880, \"16 cases\") ✓\n- **New test passes**: `bug-93-git-subfolder-repo.test.js` (16/16) ✓\n- **Adjacent suites green**: bug-89-nested-repo-detect (4), bug-91 (14), chat-routing (8), chat-persistence-contract (25) — total 67 cases across 4 adjacent suites ✓\n- **No grep-detectable regression**: `handleGit` is referenced once in `COMMANDS[].handler` (line 220) — the dispatch at line 252 already awaits handlers, so the `async` conversion is safe. `_resolveGitCwd` is defined (2165), called from `handleGit` (2241), and exported (2310). No other call sites — the change is fully additive. `detectHost` (git-hosts.js) is untouched, so bug-89's contract holds (confirmed by bug-89-nested-repo-detect green).\n- **RED → GREEN confirmed**: 16 failures pre-fix → 16 passes post-fix.\n\n[stage: verify done]",
+          "inTok": 1629,
+          "outTok": 1039,
+          "costUsd": 1.7005929999999996
+        },
+        {
+          "status": "success",
+          "ts": "2026-06-29T03:13:32.849Z",
+          "startedAt": "2026-06-29T02:54:59.007Z",
+          "summary": "6.7s · 274→58 tok",
+          "result": "bug-93 run complete. Code on disk in the session workspace (`server/src/slashcmds.js` + `test/bug-93-git-subfolder-repo.test.js` + `test/test.sh` wiring), uncommitted. Awaiting your explicit commit/push instruction.",
+          "inTok": 274,
+          "outTok": 58,
+          "costUsd": 1.7491409999999996
+        }
+      ]
     }
   ],
-  "updatedAt": "2026-06-25T03:57:12.614Z"
+  "updatedAt": "2026-06-29T02:54:36.136Z"
 }

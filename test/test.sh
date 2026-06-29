@@ -4865,6 +4865,19 @@ test_chat_window() {
   # numeric-only, @all, known/unknown letter-first, alphanumeric-digit-first
   # (out of scope), head-of-message anchoring, and the 30-digit cap.
   node_test_result test/bug-91-numeric-mention-suppression.test.js "test/bug-91-numeric-mention-suppression.test.js (15 cases)"
+  # bug-93: /git failed with "not a git repository" (exit 128) when the
+  # session workspace (rec.absCwd) was a wrapper folder and the actual
+  # git repo lived in an immediate subfolder (e.g. .../OptixAgentCore
+  # where OptixAgentCore is the repo). handleGit bound `cwd: rec.absCwd`
+  # directly with no nested-repo fallback. Test pins: _resolveGitCwd
+  # helper probes via `git rev-parse --show-toplevel` (not remote
+  # get-url, so local-only repos resolve), walks one level deep into
+  # non-dot children (cap 50, mirror bug-89), falls back to absCwd when
+  # no child matches; handleGit is async + awaits _resolveGitCwd + binds
+  # cwd:gitCwd + emits a subfolder note when gitCwd !== rec.absCwd;
+  # behavior ref-impl covers wrapper+child, wrapper+no-child, dot-skip,
+  # wrapper-IS-repo, empty absCwd.
+  node_test_result test/bug-93-git-subfolder-repo.test.js "test/bug-93-git-subfolder-repo.test.js (16 cases)"
   # 2026-05-17 chat persistence + cross-device + ordering contract.
   # Locks the four pillars documented in CLAUDE.md → "Chat persistence
   # & cross-device consistency": (1) every device sees identical

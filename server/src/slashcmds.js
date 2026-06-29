@@ -13,6 +13,8 @@ const permissions = require('./permissions');
 // is a circular chain. sessions.js exports its API via Object.assign AFTER
 // the initial module.exports, so destructuring at require-time gets undefined.
 const sessionsMod = require('./sessions');
+const fsp = require('fs/promises');
+const nodePath = require('path');
 
 const ASSISTANT_USER = 'claude';
 
@@ -2143,6 +2145,52 @@ function _parseShellArgs(str) {
   return out;
 }
 
+// bug-93: resolve the git work-tree root for a session workspace that
+// may be a wrapper folder around an immediate-subfolder git repo (e.g.
+// `~/…/myco-foster-chen-eca6ed8d/OptixAgentCore` where OptixAgentCore
+// is the repo and the parent is just a wrapper). Returns absCwd itself
+// when absCwd is inside a repo; otherwise walks one level deep into
+// non-dot children (cap NESTED_REPO_MAX_CHILDREN=50, mirror bug-89) and
+// returns the first child whose `git rev-parse --show-toplevel` succeeds.
+// Falls back to absCwd when no child matches, so /git still surfaces
+// git's native "not a git repository" error for genuinely non-repo
+// sessions instead of a bespoke message that hides the failure.
+//
+// Uses `git rev-parse --show-toplevel` (NOT `remote get-url origin`) so
+// local-only repos without a remote still resolve — detectHost's host-
+// regex gate would reject them, which is wrong for a generic /git
+// passthrough.
+const NESTED_REPO_MAX_CHILDREN = 50;
+
+function _resolveGitCwd(absCwd) {
+  return new Promise((resolve) => {
+    if (!absCwd) return resolve(absCwd || '');
+    const { execFile } = require('child_process');
+    execFile('git', ['-C', absCwd, 'rev-parse', '--show-toplevel'],
+      { timeout: 4000 }, (err) => {
+        if (!err) return resolve(absCwd);  // absCwd is inside a repo — use it.
+        // Walk immediate non-dot children one level deep (mirror bug-89).
+        (async () => {
+          let entries;
+          try { entries = await fsp.readdir(absCwd, { withFileTypes: true }); }
+          catch { return resolve(absCwd); }
+          for (let i = 0; i < entries.length && i < NESTED_REPO_MAX_CHILDREN; i++) {
+            const e = entries[i];
+            if (!e.isDirectory()) continue;
+            if (e.name.startsWith('.')) continue;  // skip .git, .cache, .vscode, …
+            const child = nodePath.join(absCwd, e.name);
+            const ok = await new Promise((r) => {
+              execFile('git', ['-C', child, 'rev-parse', '--show-toplevel'],
+                { timeout: 4000 }, (e2) => r(!e2));
+            });
+            if (ok) return resolve(child);
+          }
+          return resolve(absCwd);  // fallback — let git emit its native error.
+        })();
+      });
+  });
+}
+
 // fr-54: /git <args> — pass-through to the git CLI in the session's
 // workspace. Owner+admin only. Full passthrough — no allowlist of
 // subcommands, no PAT auto-injection. Use /setpat or embed the PAT
@@ -2153,10 +2201,15 @@ function _parseShellArgs(str) {
 // markdown code-fenced block with stdout, then stderr (if any), then
 // an exit-code footer.
 //
+// bug-93: the session workspace (rec.absCwd) may be a wrapper folder
+// around an immediate-subfolder git repo. _resolveGitCwd finds the
+// actual repo root; when it differs from rec.absCwd, a one-line note
+// tells the user which subfolder git ran in.
+//
 // Note: `git config --global` mutates the container's shared $HOME,
 // affecting all sessions. We don't block it (consenting adults) but
 // the help text flags this.
-function handleGit(ctx) {
+async function handleGit(ctx) {
   if (!sessionsMod.isOwnerOrAdmin(ctx.sessionId, ctx.user)) {
     const rec = sessionsMod.getSessionRecord(ctx.sessionId);
     const ownerLabel = rec ? `@${rec.user}` : '(unknown)';
@@ -2184,9 +2237,14 @@ function handleGit(ctx) {
     ctx.reply('Usage: `/git <subcommand> [args...]`');
     return;
   }
+  // bug-93: resolve the actual git work-tree root before spawning.
+  const gitCwd = await _resolveGitCwd(rec.absCwd);
+  const subfolderNote = gitCwd !== rec.absCwd
+    ? `\n(running in \`${nodePath.relative(rec.absCwd, gitCwd) || nodePath.basename(gitCwd)}\` — \`${rec.absCwd}\` is not a git repo, but this subfolder is.)`
+    : '';
   const { execFile } = require('child_process');
   execFile('git', argv, {
-    cwd: rec.absCwd,
+    cwd: gitCwd,
     timeout: 60000,
     maxBuffer: 1024 * 1024,      // 1 MB stdout cap
     env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },  // never block on creds prompt
@@ -2194,6 +2252,7 @@ function handleGit(ctx) {
     const out = String(stdout || '').slice(0, 64 * 1024);
     const erro = String(stderr || '').slice(0, 16 * 1024);
     const lines = [`$ git ${argsRaw}`];
+    if (subfolderNote) lines.push(subfolderNote);
     if (out.trim()) lines.push('```\n' + out.replace(/\n+$/, '') + '\n```');
     if (erro.trim()) lines.push('**stderr:**\n```\n' + erro.replace(/\n+$/, '') + '\n```');
     if (err) {
@@ -2246,4 +2305,7 @@ module.exports = {
   // fr-54: exposed for unit-testing the shell-style arg splitter
   // /git uses (quoted phrases, escapes, etc.).
   _parseShellArgs,
+  // bug-93: exposed for unit-testing the nested-repo resolution
+  // /git uses to find the git work-tree root when absCwd is a wrapper.
+  _resolveGitCwd,
 };
